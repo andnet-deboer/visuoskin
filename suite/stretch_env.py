@@ -221,7 +221,8 @@ class FrameStackWrapper(dm_env.Environment):
         self._num_frames = num_frames
 
         self.pixel_keys = [
-            keys for keys in env.observation_spec().keys() if "pixels" in keys
+            keys for keys in env.observation_spec().keys() 
+            if "pixels" in keys or "camera" in keys
         ]
         wrapped_obs_spec = env.observation_spec()[self.pixel_keys[0]]
 

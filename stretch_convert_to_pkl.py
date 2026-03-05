@@ -180,7 +180,7 @@ def process_episode(mcap_path, projector):
 
     # ── Convert to ViSk format ─────────────────────────────────────────────
     # Images: (T, H, W, 3) uint8
-    cam_gripper = np.array(images_synced, dtype=np.uint8)
+    wrist_camera = np.array(images_synced, dtype=np.uint8)
 
     # EE: quat → axis-angle for cartesian_states (T, 6)
     ee_arr = np.array(ee_synced, dtype=np.float32)      # (T, 7) xyz+quat
@@ -202,7 +202,7 @@ def process_episode(mcap_path, projector):
           f"| tactile shape {sensor_states.shape}")
 
     return {
-        "cam_gripper": cam_gripper,
+        "wrist_camera": wrist_camera,
         "cartesian_states": cartesian_states,
         "gripper_states": gripper_states,
         "sensor_states": sensor_states,

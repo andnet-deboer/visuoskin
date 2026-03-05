@@ -1,6 +1,6 @@
 bc_dataset:
   _target_: read_data.stretch_env_aa.BCDataset
-  path: ${root_dir}/processed_data_pkl_aa
+  path: ${root_dir}/processed_data_pkl
   tasks: ${suite.task.tasks}
   num_demos_per_task: ${num_demos_per_task}
   temporal_agg: ${temporal_agg}
@@ -10,7 +10,7 @@ bc_dataset:
   store_actions: true
   pixel_keys: ${suite.pixel_keys}
   aux_keys: ${suite.aux_keys}
-  subsample: 5
+  subsample: null
   skip_first_n: 0
   relative_actions: true
   random_mask_proprio: false

@@ -20,6 +20,33 @@ def get_quaternion_orientation(cartesian):
     return np.array(new_cartesian, dtype=np.float32)
 
 
+def get_relative_action(actions, action_after_steps):
+    relative_actions = []
+    for i in range(len(actions)):
+        pos_prev = actions[i, :3]
+        ori_prev = actions[i, 3:6]
+        r_prev = R.from_rotvec(ori_prev).as_matrix()
+        matrix_prev = np.eye(4)
+        matrix_prev[:3, :3] = r_prev
+        matrix_prev[:3, 3] = pos_prev
+        next_idx = min(i + action_after_steps, len(actions) - 1)
+        pos = actions[next_idx, :3]
+        ori = actions[next_idx, 3:6]
+        gripper = actions[next_idx, 6:]
+        r = R.from_rotvec(ori).as_matrix()
+        matrix = np.eye(4)
+        matrix[:3, :3] = r
+        matrix[:3, 3] = pos
+        matrix_rel = np.linalg.inv(matrix_prev) @ matrix
+        pos_rel = pos - pos_prev
+        r_rel = R.from_matrix(matrix_rel[:3, :3]).as_rotvec()
+        relative_actions.append(np.concatenate([pos_rel, r_rel, gripper]))
+    last_action = np.zeros_like(actions[-1])
+    last_action[-1] = actions[-1][-1]
+    while len(relative_actions) < len(actions):
+        relative_actions.append(last_action)
+    return np.array(relative_actions, dtype=np.float32)
+
 class BCDataset(IterableDataset):
     def __init__(
         self,
@@ -100,7 +127,10 @@ class BCDataset(IterableDataset):
                     actions = actions[::subsample]
 
                 # Action target: shift by action_after_steps
-                actions = actions[self._action_after_steps:]
+                if relative_actions:
+                    actions = get_relative_action(actions, self._action_after_steps)
+                else:
+                    actions = actions[self._action_after_steps:]
 
                 # Convert cartesian_states to quaternion for proprioceptive input
                 obs["cartesian_states"] = get_quaternion_orientation(
