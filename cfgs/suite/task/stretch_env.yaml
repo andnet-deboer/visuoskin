@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+
+suite: stretch_env
+tasks:
+  - place_coffee_cup
